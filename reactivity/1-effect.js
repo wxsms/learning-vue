@@ -1,40 +1,60 @@
 let currentEffect;
+let targetMap = new WeakMap();
 
-export class Dep {
-  constructor (val) {
-    this._value = val;
-    this.deps = new Set();
+export class ReactiveEffect {
+  constructor (fn) {
+    this.fn = fn;
+    // this.deps = [];
+    // this.active = true;
   }
 
-  get value () {
-    this.collectDeps();
-    return this._value;
-  }
-
-  set value (val) {
-    this._value = val;
-    this.triggerEffects();
-  }
-
-  collectDeps = () => {
-    if (currentEffect) {
-      // console.log('collectDeps',this._value,currentEffect)
-      this.deps.add(currentEffect);
-    }
-  };
-
-  triggerEffects = () => {
-    for (let effect of this.deps) {
-      effect.run();
+  run () {
+    try {
+      currentEffect = this;
+      return this.fn();
+    } catch (err) {
+      // ignore
+    } finally {
+      currentEffect = null;
     }
   };
 }
 
-export function effect (e) {
-  e.run = () => {
-    currentEffect = e;
-    e();
-    currentEffect = null;
-  };
+export function effect (fn) {
+  let e = new ReactiveEffect(fn);
   e.run();
+  return e;
+}
+
+/**
+ * add currentEffect to dep
+ */
+export function track (target, prop) {
+  if (!currentEffect) {
+    return;
+  }
+  // Map(prop -> dep)
+  let depsMap = targetMap.get(target);
+  // init if not found
+  if (!depsMap) {
+    depsMap = new Map();
+    targetMap.set(target, depsMap);
+  }
+  // Set(effect)
+  let dep = depsMap.get(prop);
+  if (!dep) {
+    dep = new Set();
+    depsMap.set(prop, dep);
+  }
+  // add effect to dep
+  dep.add(currentEffect);
+}
+
+/**
+ * trigger all effects on dep
+ */
+export function trigger (target, prop) {
+  for (let effect of targetMap.get(target)?.get(prop) ?? []) {
+    effect.run();
+  }
 }

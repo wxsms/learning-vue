@@ -1,41 +1,24 @@
-import { Dep, effect } from './1-effect';
-import { reactive } from './2-reactive';
+import { effect, track, trigger } from './1-effect';
 
 const { jest } = import.meta;
 
-describe('dep and effect', () => {
+describe('effect', () => {
   it('should work', () => {
-    let d = new Dep(10);
-    let double;
-    let e = jest.fn(() => {
-      double = d.value * 2;
+    let obj = { a: 1, b: { c: 2 } };
+    let fn = jest.fn(() => {
+      track(obj, 'a');
+      track(obj.b, 'c');
     });
-    expect(e).toBeCalledTimes(0);
+    effect(fn);
+    expect(fn).toHaveBeenCalledTimes(1);
 
-    effect(e);
-    expect(double).toEqual(20);
-    expect(e).toBeCalledTimes(1);
+    trigger(obj, 'a');
+    expect(fn).toHaveBeenCalledTimes(2);
 
-    d.value = 20;
-    expect(double).toEqual(40);
-    expect(e).toBeCalledTimes(2);
+    trigger(obj.b, 'c');
+    expect(fn).toHaveBeenCalledTimes(3);
 
-    d.value = 100;
-    expect(double).toEqual(200);
-    expect(e).toBeCalledTimes(3);
-  });
-
-  it('multiple dep', () => {
-    let d1 = new Dep(10);
-    let d2 = new Dep(20);
-    let sum;
-
-    effect(() => {
-      sum = d1.value + d2.value;
-    });
-    expect(sum).toEqual(30);
-
-    d1.value = 20;
-    expect(sum).toEqual(40);
+    trigger(obj.b, 'qweqwe');
+    expect(fn).toHaveBeenCalledTimes(3);
   });
 });

@@ -9,18 +9,18 @@ export function computed (eff) {
   } else {
     // with both getter and setter
     getterEff(result, eff.get);
-    setterEff(result, eff.set)
+    setterEff(result, eff.set);
   }
   return result;
 }
 
-function getterEff(computedRef, eff) {
+function getterEff (computedRef, eff) {
   effect(() => {
     computedRef.value = eff();
   });
 }
 
-function setterEff(computedRef, eff) {
+function setterEff (computedRef, eff) {
   // setter effect
   effect(() => {
     eff(computedRef.value);

@@ -1,4 +1,3 @@
-import { Dep, effect } from './1-effect';
 import { ref } from './3-ref';
 import { computed } from './4-computed';
 

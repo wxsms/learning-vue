@@ -1,4 +1,4 @@
-import { Dep, effect } from './1-effect';
+import { effect } from './1-effect';
 import { ref } from './3-ref';
 
 const { jest } = import.meta;
