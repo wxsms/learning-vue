@@ -1,5 +1,5 @@
-import { Dep, effect } from './effect';
-import { reactive } from './reactive';
+import { Dep, effect } from './1-effect';
+import { reactive } from './2-reactive';
 
 const { jest } = import.meta;
 

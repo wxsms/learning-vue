@@ -1,4 +1,4 @@
-import { Dep } from './effect';
+import { Dep } from './1-effect';
 
 let globalReactiveMap = new WeakMap();
 
@@ -23,6 +23,11 @@ export function reactive (obj) {
       return Reflect.get(...arguments);
     },
     set (target, p, value, receiver) {
+      let oldValue = Reflect.get(...arguments);
+      // prevent infinite loop
+      if (oldValue === value) {
+        return value;
+      }
       Reflect.set(...arguments);
       getDep(...arguments).triggerEffects();
       return value;
