@@ -18,19 +18,23 @@ export class Dep {
 
   collectDeps = () => {
     if (currentEffect) {
+      // console.log('collectDeps',this._value,currentEffect)
       this.deps.add(currentEffect);
     }
   };
 
   triggerEffects = () => {
     for (let effect of this.deps) {
-      effect();
+      effect.run();
     }
   };
 }
 
 export function effect (e) {
-  currentEffect = e;
-  e();
-  currentEffect = null;
+  e.run = () => {
+    currentEffect = e;
+    e();
+    currentEffect = null;
+  };
+  e.run();
 }

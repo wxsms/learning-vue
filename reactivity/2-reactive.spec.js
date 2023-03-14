@@ -1,5 +1,6 @@
-import { Dep, effect } from './1-effect';
+import { effect } from './1-effect';
 import { reactive } from './2-reactive';
+// import { effect, reactive } from '@vue/reactivity';
 
 const { jest } = import.meta;
 
@@ -53,5 +54,66 @@ describe('reactive', () => {
     a.value = 4;
     expect(b.value).toEqual(8);
     expect(e).toBeCalledTimes(2);
+  });
+
+  it('deep object', () => {
+    let a = reactive({ deep: { deep2: { value: 1 } } });
+    let b;
+
+    effect(() => {
+      b = a.deep.deep2.value * 2;
+    });
+    expect(b).toEqual(2);
+
+    a.deep.deep2.value = 4;
+    expect(b).toEqual(8);
+
+    a.deep = { deep2: { value: 8 } };
+    expect(b).toEqual(16);
+
+    a.deep.deep2 = { value: 16 };
+    expect(b).toEqual(32);
+
+    a.deep.deep2.value = 32;
+    expect(b).toEqual(64);
+  });
+
+  it('deep object but init later', () => {
+    let a = reactive({});
+    let b = null;
+
+    effect(() => {
+      if (!a.deep || !a.deep.deep2) {
+        b = null;
+        return;
+      }
+      b = a.deep.deep2.value * 2;
+    });
+    expect(b).toEqual(null);
+
+    a.deep = { deep2: { value: 4 } };
+    expect(b).toEqual(8);
+
+    a.deep.deep2 = { value: 8 };
+    expect(b).toEqual(16);
+
+    a.deep.deep2.value = 16;
+    expect(b).toEqual(32);
+
+    a.deep.deep2.value = 32;
+    expect(b).toEqual(64);
+  });
+
+  it.skip('works on array', () => {
+    let a = reactive([1, 2, 3]);
+    let b = null;
+
+    effect(() => {
+      b = a[0];
+    });
+    expect(b).toEqual(1);
+
+    a[0] = 0;
+    expect(b).toEqual(0);
   });
 });

@@ -1,35 +1,48 @@
 import { Dep } from './1-effect';
 
-let globalReactiveMap = new WeakMap();
+let targetDepsMap = new WeakMap();
 
-function getDep (target, p) {
-  let targetMap = globalReactiveMap.get(target);
-  if (!targetMap) {
-    targetMap = new Map();
-    globalReactiveMap.set(target, targetMap);
+function getDep (target, p, ...args) {
+  let depsMap = targetDepsMap.get(target);
+  if (!depsMap) {
+    depsMap = new Map();
+    targetDepsMap.set(target, depsMap);
   }
-  let dep = targetMap.get(p);
+  let dep = depsMap.get(p);
   if (!dep) {
-    dep = new Dep();
-    targetMap.set(p, dep);
+    dep = new Dep(Reflect.get(...arguments));
+    depsMap.set(p, dep);
   }
+  // console.log(target, p, dep.deps.size);
   return dep;
 }
 
 export function reactive (obj) {
   return new Proxy(obj, {
     get (target, p, receiver) {
+      // console.log('get:', target, p);
+      let value = Reflect.get(...arguments);
       getDep(...arguments).collectDeps();
-      return Reflect.get(...arguments);
+
+      // if value is an object,
+      // need to proxy all nested values
+      if (value !== null && typeof value === 'object') {
+        return reactive(value);
+      }
+
+      return value;
     },
     set (target, p, value, receiver) {
+      // console.log('set:', target, p, value);
       let oldValue = Reflect.get(...arguments);
       // prevent infinite loop
       if (oldValue === value) {
         return value;
       }
       Reflect.set(...arguments);
+      // trigger effect on the target
       getDep(...arguments).triggerEffects();
+
       return value;
     }
   });
