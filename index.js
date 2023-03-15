@@ -1,4 +1,6 @@
 import { effect } from './reactivity/1-effect.js';
+import { h } from './renderer/h.js';
+import { mountElement } from './renderer/mountElement.js';
 
 export function createApp (Component) {
   return {
@@ -7,8 +9,8 @@ export function createApp (Component) {
       let context = Component.setup();
       effect(() => {
         rootNode.innerHTML = '';
-        let node = Component.render(context);
-        rootNode.append(node);
+        let vnode = Component.render(context);
+        mountElement(vnode, rootNode);
       });
     }
   };

@@ -1,5 +1,5 @@
-import { ref } from './3-ref';
-import { effect } from './1-effect';
+import { ref } from './3-ref.js';
+import { effect } from './1-effect.js';
 
 export function computed (eff) {
   let result = ref(null);

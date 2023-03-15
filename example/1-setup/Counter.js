@@ -1,26 +1,49 @@
 import { ref } from '../../reactivity/3-ref.js';
 import { createApp } from '../../index.js';
 import { reactive } from '../../reactivity/2-reactive.js';
+import { h } from '../../renderer/h.js';
+import { computed } from '../../reactivity/4-computed.js';
 
 let Counter = {
   setup () {
-    let count = reactive({ value: 0 });
-    return { count };
+    let count = ref(0);
+    let double = computed(() => count.value * 2);
+
+    return { count, double };
   },
   render (ctx) {
-    let div = document.createElement('div');
-    div.textContent = ctx.count.value;
-
-    div.append(document.createElement('br'));
-
-    let button = document.createElement('button');
-    button.textContent = 'add';
-    button.onclick = () => {
-      ctx.count.value = ctx.count.value + 1;
-    };
-    div.append(button);
-
-    return div;
+    return h(
+      'div',
+      {
+        class: 'counter',
+      },
+      [
+        h(
+          'button',
+          {
+            style: 'margin-right: 10px',
+            type: 'button',
+            onclick () {
+              ctx.count.value--;
+            }
+          },
+          'minus'
+        ),
+        ctx.count.value,
+        h(
+          'button',
+          {
+            style: 'margin: 0 10px',
+            type: 'button',
+            onclick () {
+              ctx.count.value++;
+            }
+          },
+          'add'
+        ),
+        'double: ' + ctx.double.value
+      ]
+    );
   },
 };
 
