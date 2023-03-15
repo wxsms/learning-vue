@@ -1,14 +1,20 @@
 let currentEffect;
+
+// target (object) -> key (string) -> deps (set)
 let targetMap = new WeakMap();
 
 export class ReactiveEffect {
   constructor (fn) {
     this.fn = fn;
-    // this.deps = [];
-    // this.active = true;
+    this.deps = new Set();
+    this.active = true;
   }
 
   run () {
+    // effect stopped, no need to collect deps anymore
+    if (!this.active) {
+      return this.fn();
+    }
     try {
       currentEffect = this;
       return this.fn();
@@ -18,12 +24,22 @@ export class ReactiveEffect {
       currentEffect = null;
     }
   };
+
+  stop () {
+    this.active = false;
+    // remove this effect from all it's deps
+    for (let dep of this.deps) {
+      dep.delete(this);
+    }
+    // clear this effect's deps
+    this.deps.clear();
+  }
 }
 
 export function effect (fn) {
   let e = new ReactiveEffect(fn);
   e.run();
-  return e;
+  return e.stop.bind(e);
 }
 
 /**
@@ -48,6 +64,8 @@ export function track (target, prop) {
   }
   // add effect to dep
   dep.add(currentEffect);
+  // add dep to effect
+  currentEffect.deps.add(dep);
 }
 
 /**
