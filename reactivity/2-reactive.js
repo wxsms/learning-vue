@@ -1,5 +1,5 @@
-import { track, trigger } from './1-effect';
-import { isObj } from '../utils';
+import { track, trigger } from './1-effect.js';
+import { isObj } from '../utils/index.js';
 
 export function reactive (obj) {
   return new Proxy(obj, {
