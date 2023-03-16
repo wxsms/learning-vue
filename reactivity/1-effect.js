@@ -1,7 +1,6 @@
-let currentEffect;
+import { Dep, depsMap } from './0-dep';
 
-// target (object) -> key (string) -> deps (set)
-let targetMap = new WeakMap();
+let currentEffect;
 
 export class ReactiveEffect {
   constructor (fn) {
@@ -50,17 +49,17 @@ export function track (target, prop) {
     return;
   }
   // Map(prop -> dep)
-  let depsMap = targetMap.get(target);
+  let deps = depsMap.get(target);
   // init if not found
-  if (!depsMap) {
-    depsMap = new Map();
-    targetMap.set(target, depsMap);
+  if (!deps) {
+    deps = new Map();
+    depsMap.set(target, deps);
   }
   // Set(effect)
-  let dep = depsMap.get(prop);
+  let dep = deps.get(prop);
   if (!dep) {
-    dep = new Set();
-    depsMap.set(prop, dep);
+    dep = new Dep();
+    deps.set(prop, dep);
   }
   // add effect to dep
   dep.add(currentEffect);
@@ -72,7 +71,7 @@ export function track (target, prop) {
  * trigger all effects on dep
  */
 export function trigger (target, prop) {
-  for (let effect of targetMap.get(target)?.get(prop) ?? []) {
+  for (let effect of depsMap.get(target)?.get(prop)?.effects ?? []) {
     effect.run();
   }
 }
