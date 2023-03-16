@@ -23,6 +23,7 @@ let Counter = {
           {
             style: 'margin-right: 10px',
             type: 'button',
+            id: `minus-${ctx.count.value}`,
             onclick () {
               ctx.count.value--;
             }
