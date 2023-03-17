@@ -20,17 +20,17 @@ export function reactive (obj) {
       if (oldValue === value) {
         return value;
       }
-      let v = Reflect.set(...arguments);
+      let newValue = Reflect.set(...arguments);
       // trigger effects
       trigger(...arguments);
 
-      return v;
+      return newValue;
     },
-    ownKeys (target) {
-      if (Array.isArray(target)) {
-        track(target, 'length');
-      }
-      return Reflect.ownKeys(target);
-    }
+    // ownKeys (target) {
+    //   if (Array.isArray(target)) {
+    //     track(target, 'length');
+    //   }
+    //   return Reflect.ownKeys(target);
+    // }
   });
 }
