@@ -104,7 +104,7 @@ describe('reactive', () => {
     expect(b).toEqual(64);
   });
 
-  it.skip('works on array', () => {
+  it('works on array', () => {
     let a = reactive([1, 2, 3]);
     let b = null;
 
@@ -115,5 +115,8 @@ describe('reactive', () => {
 
     a[0] = 0;
     expect(b).toEqual(0);
+
+    a.unshift(-1);
+    expect(b).toEqual(-1);
   });
 });

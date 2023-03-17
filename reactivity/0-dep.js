@@ -6,15 +6,17 @@ export class Dep {
     this._effects = new Set();
   }
 
-  get effects () {
-    return this._effects;
+  untrack (e) {
+    this._effects.delete(e);
   }
 
-  add (e) {
+  track (e) {
     this._effects.add(e);
   }
 
-  delete (e) {
-    this._effects.delete(e);
+  trigger () {
+    for (let e of this._effects) {
+      e.run();
+    }
   }
 }

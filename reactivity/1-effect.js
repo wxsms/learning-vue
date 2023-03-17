@@ -28,7 +28,7 @@ export class ReactiveEffect {
     this.active = false;
     // remove this effect from all it's deps
     for (let dep of this.deps) {
-      dep.delete(this);
+      dep.untrack(this);
     }
     // clear this effect's deps
     this.deps.clear();
@@ -48,21 +48,9 @@ export function track (target, prop) {
   if (!currentEffect) {
     return;
   }
-  // Map(prop -> dep)
-  let deps = depsMap.get(target);
-  // init if not found
-  if (!deps) {
-    deps = new Map();
-    depsMap.set(target, deps);
-  }
-  // Set(effect)
-  let dep = deps.get(prop);
-  if (!dep) {
-    dep = new Dep();
-    deps.set(prop, dep);
-  }
+  let dep = getDep(target, prop);
   // add effect to dep
-  dep.add(currentEffect);
+  dep.track(currentEffect);
   // add dep to effect
   currentEffect.deps.add(dep);
 }
@@ -71,7 +59,23 @@ export function track (target, prop) {
  * trigger all effects on dep
  */
 export function trigger (target, prop) {
-  for (let effect of depsMap.get(target)?.get(prop)?.effects ?? []) {
-    effect.run();
+  depsMap.get(target)?.get(prop)?.trigger();
+}
+
+function getDep (target, prop) {
+  // 从 depsMap 中找到本 target 的 Map
+  let deps = depsMap.get(target);
+  // 没找到，需要初始化
+  if (!deps) {
+    deps = new Map();
+    depsMap.set(target, deps);
   }
+  // 从第二级的 Map 中找到本 prop 的 dep
+  let dep = deps.get(prop);
+  // 没找到，需要初始化
+  if (!dep) {
+    dep = new Dep();
+    deps.set(prop, dep);
+  }
+  return dep;
 }
