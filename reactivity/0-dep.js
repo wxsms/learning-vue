@@ -16,7 +16,11 @@ export class Dep {
 
   trigger () {
     for (let e of this._effects) {
-      e.run();
+      if (e.scheduler) {
+        e.scheduler();
+      } else {
+        e.run();
+      }
     }
   }
 }

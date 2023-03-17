@@ -3,8 +3,9 @@ import { Dep, depsMap } from './0-dep';
 let currentEffect;
 
 export class ReactiveEffect {
-  constructor (fn) {
+  constructor (fn, scheduler) {
     this.fn = fn;
+    this.scheduler = scheduler;
     this.deps = new Set();
     this.active = true;
   }
@@ -35,10 +36,10 @@ export class ReactiveEffect {
   }
 }
 
-export function effect (fn) {
-  let e = new ReactiveEffect(fn);
+export function effect (fn, scheduler) {
+  let e = new ReactiveEffect(fn, scheduler);
   e.run();
-  return e.stop.bind(e);
+  return e;
 }
 
 /**

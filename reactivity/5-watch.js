@@ -1,18 +1,19 @@
 import { effect } from './1-effect';
 
-export const watchEffect = effect;
+export const watchEffect = (cb) => {
+  let e = effect(cb);
+  return e.stop.bind(e);
+};
 
-export function watch (source, callback) {
+export function watch (getter, cb) {
   let oldValue;
-  let firstrun = true;
+  let job = () => {
+    let newVal = e.run();
+    cb(newVal, oldValue);
+    oldValue = newVal;
+  };
+  let e = effect(getter, job);
+  oldValue = e.run();
 
-  return effect(() => {
-    if (firstrun) {
-      firstrun = false;
-      oldValue = JSON.parse(JSON.stringify(source));
-      return;
-    }
-    callback(source, oldValue);
-    oldValue = JSON.parse(JSON.stringify(source));
-  });
+  return e.stop.bind(e);
 }
